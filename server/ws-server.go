@@ -136,28 +136,13 @@ func (ws *Websocket) Recv() (Frame, error) {
 }
 
 func (ws *Websocket) read(size int) ([]byte, error) {
-	data := make([]byte, 0)
-	for {
-		if len(data) == size {
-			break
-		}
-		// Temporary slice to read chunk
-		sz := bufferSize
-		remaining := size - len(data)
-		if sz > remaining {
-			sz = remaining
-		}
-		temp := make([]byte, sz)
-
-		n, err := ws.bufrw.Read(temp)
-		if err != nil && err != io.EOF {
-			return data, err
-		}
-
-		data = append(data, temp[:n]...)
+	data := make([]byte, size)
+	n, err := ws.bufrw.Read(data)
+	if err != nil && err != io.EOF {
+		return data, err
 	}
 	fmt.Println(data)
-	return data, nil
+	return data[:n], nil
 }
 
 func (ws *Websocket) Send(frame Frame) error {
