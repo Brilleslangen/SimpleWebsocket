@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var addr = flag.String("address", "localhost:8080", "http service address")
+var addr = flag.String("address", "192.168.1.111:8080", "http service address")
 
 func main() {
 	var msg string

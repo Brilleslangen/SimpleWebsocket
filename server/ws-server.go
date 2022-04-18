@@ -39,7 +39,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(*address, nil))
 }
 
-var address = flag.String("address", "localhost:8080", "http address")
+var address = flag.String("address", "192.168.1.111:8080", "http address")
 
 func IndexHandler(w http.ResponseWriter, req *http.Request) {
 	websocket, err := InitWebsocket(w, req)
@@ -48,6 +48,7 @@ func IndexHandler(w http.ResponseWriter, req *http.Request) {
 
 	err = websocket.Handshake()
 	check(err)
+	fmt.Println(websocket.conn.RemoteAddr().String(), "has connected")
 
 	for {
 		frame := Frame{}
