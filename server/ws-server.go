@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/sha1"
 	"encoding/base64"
+	"encoding/binary"
 	"errors"
 	"flag"
 	"fmt"
@@ -50,7 +51,7 @@ func IndexHandler(w http.ResponseWriter, req *http.Request) {
 
 	for {
 		frame := Frame{}
-		frame, err = websocket.Recv()
+		frame, err = websocket.Receive()
 		if string(frame.Payload) == "EXIT" {
 			err = websocket.Close()
 			check(err)
@@ -91,8 +92,7 @@ func (ws *Websocket) Handshake() error {
 		"Upgrade: WebSocket",
 		"Connection: Upgrade",
 		"Sec-WebSocket-Accept: " + hash,
-		"", //  Two spaces to signalize that header is finished.
-		"",
+		"", "", // Signalize end of header
 	}
 
 	// Send Header
@@ -102,7 +102,7 @@ func (ws *Websocket) Handshake() error {
 	return ws.bufrw.Flush()
 }
 
-func (ws *Websocket) Recv() (Frame, error) {
+func (ws *Websocket) Receive() (Frame, error) {
 	frame := Frame{}
 
 	// Extract head and mask bytes
@@ -171,8 +171,21 @@ func (ws *Websocket) write(data []byte) error {
 
 // Close closes tcp connection and ends handshake
 func (ws *Websocket) Close() error {
+	frame := Frame{}
+	frame.Length = 2
+	frame.Payload = make([]byte, 2)
+	binary.BigEndian.PutUint16(frame.Payload, ws.status)
 
-	// Fill this with closing code.
+	// Send Closing signal
+	data := make([]byte, 2)
+	data[0] = 0x80 | 0x8
+
+	/*
+		if err := ws.Send(frame); err != nil {
+			return err
+		}
+	*/
+
 	return ws.conn.Close()
 }
 
