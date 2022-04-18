@@ -189,7 +189,6 @@ func (ws *Websocket) Close() error {
 	return ws.conn.Close()
 }
 
-// Check documentation on this
 func getAcceptHash(key string) string {
 	h := sha1.New()
 	h.Write([]byte(key))
